@@ -4,5 +4,5 @@
     用户名：root           
     密码：root      
     默认欢迎页面：login.html    
-    运行：mvn -Djetty.port=9874 jetty:run    
+    运行：mvn -Djetty.port=9574 jetty:run    
     访问地址：http://localhost:9574    
