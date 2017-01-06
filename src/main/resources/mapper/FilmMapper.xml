@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.yy.ssm.mapper.FilmMapper" >
+<resultMap type="film" id="findFilmResultMap">
+<id column="film_id" property="film_id"/>
+<result column="title" property="title"/>
+<result column="description" property="description"/>
+<result column="language_id" property="language_id"/>
+<association property="language" javaType="language">
+<result column="name" property="name"/>
+</association>
+</resultMap>
+
+<sql id="Film_language">
+ <if test="entity.title!=null">
+ and title  like CONCAT('%', #{entity.title}, '%')
+ </if>
+</sql>
+
+   <select id="findFilm" parameterType="pageData" resultMap="findFilmResultMap">
+   select film_id,title,description,film.language_id,language.name from `Film`
+    LEFT JOIN `language` on
+     `Film`.language_id=`language`.language_id
+   <where>
+   <include refid="Film_language"/>
+     limit #{startPage},#{pageSize}
+   </where>
+   </select>
+   
+   <select id="Filmcount" parameterType="pageData" resultType="int">
+   select count(*) from `Film` LEFT JOIN `language` on
+   `Film`.language_id=`language`.language_id
+   <where>
+   <include refid="Film_language"/>
+   </where>
+   </select>
+   
+   <select id="findFilmById" parameterType="film" resultMap="findFilmResultMap">
+    select film_id,title,description,film.language_id,language.name from `Film`
+    LEFT JOIN `language` on
+     `Film`.language_id=`language`.language_id where film_id=#{film_id}
+   </select>
+   
+   <update id="updateFilm" parameterType="film">
+   update film,language set title=#{title}, description=#{description},`Film`.language_id=`language`.language_id 
+   where language.name=#{language.name} and film_id=#{film_id}
+   </update>
+   
+   <delete id="deleteFilm" parameterType="film">
+   delete from Film where film_id=#{film_id}
+   </delete>
+   
+   <insert id="insertFilm" parameterType="film">
+   insert into Film(title,description,language_id) values(#{title},#{description},#{language_id})
+   </insert>
+</mapper>

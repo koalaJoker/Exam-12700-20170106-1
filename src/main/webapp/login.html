@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>登录</title>
+<link rel="stylesheet" href="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+ <style>  
+    .col-center-block {  
+        float: none;  
+        display: block;  
+        margin-left: auto;  
+        margin-right: auto; 
+        padding-top:100px
+    }  
+    </style>  
+<body>
+</head>
+<div class="container">  
+  <div class="row myCenter">  
+    <div class="col-xs-6 col-md-4 col-center-block">  
+      <form class="form-signin" action="login.action" method="post">  
+      <h1 class="form-signin-heading">欢迎来到电影租赁系统</h1>
+      </br> 
+        <h2 class="form-signin-heading">请登录：</h2>  
+        <label for="username" class="sr-only">用户名</label>  
+        <input type="text" id="username" name="username" class="form-control" placeholder="用户名" required autofocus>  
+        </br>  
+        <button id="login" class="btn btn-lg btn-primary btn-block" type="button">登录</button> 
+      </br>
+      <h4 id="show" style="color: red">  </h4>  
+ 
+      </form>  
+    </div>  
+  </div>  
+</div>  
+</body>
+<script type="text/javascript">
+$("#login").click(function(){
+	var username=$("#username").val();
+	$.ajax({
+        url: "login.action",
+        type: "GET",
+        dataType: "text",
+        data:  {username},
+        success: function (str) {
+        	if(str=="0"){
+        		$("#show").text("用户名不存在，请重新登陆！")
+        		$("#username").val("");
+        	}else{
+        		window.location.href=str;
+        	}
+        }
+        })
+})
+</script>
+</html>

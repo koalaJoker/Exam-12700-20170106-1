@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>修改</title>
+<link rel="stylesheet" href="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+</br>
+<div align="center"> <h2>修改</h2></div>
+</br></br>
+<form id="form" action="updateFilm.action" method="post">
+    <div>
+        <div class="form-horizontal" role="form">
+            <div class="form-group col-sm-12">
+                <label for="title" class="col-sm-3 control-label">电影名称</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="title" name="title" placeholder="请输入电影名称">
+                </div>
+                </div>
+                <div class="form-group col-sm-12">
+                <label for="title" class="col-sm-3 control-label">电影详情</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="description" name="description" placeholder="请输入电影详情">
+                </div>
+                </div>
+                <div class="form-group col-sm-12">
+                <label for="title" class="col-sm-3 control-label">电影语种</label>
+                <div class="col-sm-8">
+                <select class="form-control" id="language_name" name="language_name"></select>
+                </div>
+                 </div>
+                 <div class="form-group col-sm-6">
+              <div class="col-sm-offset-2 col-sm-12 col-sm-pull-1 text-right">
+                    <button id="sure" class="btn btn-info">确定</button>
+                     <h4 id="show" style="color: red"></h4> 
+                     <input id="film_id" type="hidden" name="film_id">
+                </div>
+            </div>
+             </div>
+        </div>
+</form>
+</body>
+<script type="text/javascript">
+$(function () {
+$.ajax({ 
+	url: "toAddFilm.action",
+    type: "GET",
+    success: function (data) {
+    	 for (var item of data) {
+    		 $("#language_name").append("<option value='"+item.name+"'>"+item.name+"</option>");
+    	 }
+    }
+})
+var data = location.search;
+//获取到id
+ var film_id= data.substr(9);
+ $("#film_id").val(film_id);
+ 
+	$.ajax({
+        url: "toUpdateFilm.action",
+        type: "GET",
+        dataType: "json",
+        data:  {film_id},
+        success: function (data) {
+        	$("#title").val(data.title);
+        	$("#description").val(data.description);
+        		var tem=data.language.name;
+        		$("#language_name").val(tem)
+            
+        }
+	});
+	
+	$("#sure").click(function(){
+		var $title=$("#title").val();
+		var $description=$("#description").val();
+		if($title==null || $title==""){
+			$("#show").text("电影名称不能为空,请重新输入!")
+			return false;
+		}else if( $description==null ||$description==""){
+			$("#show").text("电影详情不能为空,请重新输入!")
+			return false;
+		}else{
+			alert("修改成功！")
+			$("#form").submit();
+		}
+	})	
+});
+</script>
+</html>

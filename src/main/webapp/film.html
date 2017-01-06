@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>电影</title>
+    <link rel="stylesheet" href="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div align="center"> <h2>电影列表</h2></div><br>
+<div class="container">
+    <div>
+        <div class="form-horizontal" role="form">
+            <div class="form-group col-sm-6">
+                <label for="title" class="col-sm-3 control-label">电影名称</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="title" placeholder="请输入电影名称">
+                </div> 
+            </div>
+            <button id="queryFilm" class="btn btn-info">查询</button>
+        </div>
+    </div>
+    <div>
+   
+        <table id="filmTable" class="table table-striped">
+       
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>电影名称</th>
+                <th>电影详情</th>
+                <th>语种</th>
+                <th style="width: 80px">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+    <div>
+        <ul id="paging" class="pagination col-sm-5" style="margin:0">
+            <li><a href="#">&lt;&lt;</a></li>
+            <li><a href="#">&gt;&gt;</a></li>
+        </ul>
+        <div class="col-sm-1 " >
+            <select id="pageSize"  class="form-control">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+        <div class="col-sm-1">
+            <input id="page" type="number" class="form-control" min="1">
+        </div>
+        <div class="col-sm-1">
+        <button id="skip" class="btn btn-primary">跳转</button></div>
+    
+        <div class="col-sm-2">
+         <a  class="btn btn-primary" href="addFilm.html">新增一条记录</a></div>
+    </div>
+</div>
+</body>
+ <script id="filmInfo" type="application/html">
+        <tr>
+            <td></td><td></td><td></td><td></td><td></td>
+        </tr>
+
+    </script>
+<script type="text/javascript">
+ $(function () {
+	 window.page = {
+             currentPage: 1,//当前页
+             pageSize: Number($('#pageSize').val()),//每页显示的最大条数
+             total: 0,//总记录数
+             totalPage: 0//总页数
+         };
+queryFilm(page);
+function queryFilm(page) {
+	page.title = $('#title').val();
+     var defaultPage = {
+         title: "",
+         currentPage: 1,
+         pageSize: 10
+     };
+     page = $.extend({}, defaultPage, page);
+    $.ajax({
+        url: "queryALL.action",
+        type: "GET",
+        dataType: "json",
+        data: page,
+        success: function (data) {
+        	//获取到分页数据
+            $('#filmTable tbody').empty();
+            page.total = data.total;
+            resetPage(page); 
+            for (var item of data.data) {
+            	//数据填充
+                var $filmInfo = $($('#filmInfo').html()).clone();
+                $filmInfo.children('td').eq(0).text(item.film_id);
+                $filmInfo.children('td').eq(1).text(item.title);
+                $filmInfo.children('td').eq(2).text(item.description);
+                $filmInfo.children('td').eq(3).text(item.language.name);
+                var $edit=$("<a href='javascript:void(0)' onclick='deleteFilm("+item.film_id+")' >删除</a>       <a id='update' href='updateFilm.html?film_id="+item.film_id+"'>修改</a>");
+                $filmInfo.children('td').eq(4).html($edit);
+                $('#filmTable').append($filmInfo);
+            } 
+            $('#page').attr('max',window.page.totalPage);
+            $('#page').val(page.currentPage);
+            refreshPage();
+        }
+    })
+}
+   
+  //模糊查询电影名称 
+ $('#queryFilm').click(function (){
+	 queryFilm({
+         title: $('#title').val()
+     });
+     }
+ );
+ //首页
+ $('#paging').children('li:first').click(function() {
+     window.page.currentPage = 1;
+     queryFilm(window.page);
+ });
+//尾页
+ $('#paging').children('li:last').click(function() {
+     window.page.currentPage = window.page.totalPage;
+     queryFilm(window.page);
+ });
+ //改变每一页显示条数
+ $('#pageSize').change(function() {
+     window.page.currentPage = 1;
+     window.page.pageSize = Number($('#pageSize').val());
+     queryFilm(window.page);
+ });
+
+ $('#skip').click(function() {
+     window.page.currentPage = Number($('#page').val());
+     queryFilm(window.page);
+ });
+
+ //刷新分页的显示
+ function refreshPage() {
+     $('#paging').children('li.page').remove();
+     var pages = [];
+     if (window.page.totalPage - window.page.currentPage < 2) {
+         pages = range(Math.max(1,window.page.totalPage-4),window.page.totalPage)
+     } else if (window.page.currentPage -1 < 2) {
+         pages = range(1, Math.min(window.page.totalPage,5))
+     } else {
+         pages =  range(Number(window.page.currentPage)-2,Number(window.page.currentPage)+2);
+     }
+     var template = "<li class='page'><a  href='#'></a></li>"
+     for (var item of pages) {
+         var $first = $("#paging").children('li:last');
+         var $template = $(template);
+         $template.children('a').text(item);
+         if (item == window.page.currentPage) {
+             $template.addClass('active');
+         }
+         $first.before($template);
+     }
+     $("#paging").children('li:first').removeClass('disabled');
+     $('#paging').children('li:last').removeClass('disabled');
+     if (window.page.currentPage == 1) {
+         $("#paging").children('li:first').addClass('disabled');
+     }
+     if (window.page.currentPage == page.totalPage) {
+         $("#paging").children('li:last').addClass('disabled');
+     }
+//点击页数
+    $("#paging li.page").click(function(event) {
+         window.page.currentPage = Number($(event.target).text());
+         queryFilm(window.page)
+     }); 
+ 
+ }
+
+ function range(min,max) {
+     var arr = [];
+     for (var i=min ;i <= max; i++) {
+         arr.push(i);
+     }
+     return arr;
+ }
+ function resetPage(page) {
+	 window.page.total = page.total;
+     window.page.currentPage = page.currentPage;
+     window.page.pageSize = page.pageSize;
+     window.page.totalPage  = Math.ceil(page.total/window.page.pageSize); 
+ }
+
+
+
+ })
+ function deleteFilm(film_id){
+	 var flag=confirm('确认删除？');
+	if(flag){
+	 $.ajax({
+	        url: "deleteFilm.action",
+	        type: "GET",
+	        dataType: "text",
+	        data:{film_id} ,
+	        success: function (data) {
+	        	if(data=="false"){
+	        		alert("由于该数据关联其他数据，删除失败！")
+	        	}
+	        	else{
+	        		alert("删除成功");
+	        		location.href="film.html";
+	        	}
+	        }
+})
+	}
+ }
+ </script>
+</html>
